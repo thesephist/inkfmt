@@ -19,6 +19,14 @@ At this point, the `inkfmt` program reads Ink code in from `stdin` and writes fo
 inkfmt < main.ink > main.ink
 ```
 
+## Design
+
+Ink's indentation rules as implemented in inkfmt`are simple:
+
+- We put a single space between each individual token within a line
+- We don't mess with re-breaking lines -- line breaks in the input string / file stays
+- One indent level is added for each paired delimiter -- (){}[]''
+
 ## Credits and references
 
 - Phil Wadler's [Prettier Printer](https://homepages.inf.ed.ac.uk/wadler/papers/prettier/prettier.pdf)
