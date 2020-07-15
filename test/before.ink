@@ -4,6 +4,7 @@ a := 1
 b := 'hello'
 c := {
 	d: 4
+	`` a list of three ints
 	e: [5, 6, 7]
 	Pi: 3.141592 `` testing parsing decimals
 }
@@ -14,3 +15,9 @@ g := (a, b, c, d, e, f) =>
 	a + b + c + d +
 		e + f
 
+` copy of std.log function
+	and a description in a multiline block comment `
+Newline := char(~~10)
+log := x => (
+	out(string(x) + Newline)
+)

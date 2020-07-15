@@ -5,6 +5,7 @@ str := load('vendor/str')
 
 f := std.format
 slice := std.slice
+append := std.append
 
 letter? := str.letter?
 digit? := str.digit?
@@ -73,8 +74,10 @@ lexLineComment := state => (
 		}
 		_ -> {
 			doc: slice(state.doc, newlineIndex + 1, len(state.doc))
-			tokens: state.tokens.len(state.tokens) :=
+			tokens: append(state.tokens, [
 				'``' + slice(state.doc, 2, newlineIndex)
+				Newline
+			])
 		}
 	}
 )
@@ -89,7 +92,6 @@ indexFirstNonWS := s => (sub := i => (
 		() -> i - 1
 		' ' -> sub(i + 1)
 		Tab -> sub(i + 1)
-		Newline -> sub(i + 1)
 		_ -> i
 	}
 ))(0)
@@ -126,6 +128,10 @@ lexRec := state => (
 
 	state.doc.0 :: {
 		() -> state
+		Newline -> lexRec({
+			doc: slice(state.doc, 1, len(state.doc))
+			tokens: state.tokens.len(state.tokens) := Newline
+		})
 		'\'' -> lexRec(lexStringLiteral(state))
 		'`' -> state.doc.1 :: {
 			'`' -> lexRec(lexLineComment(state))
