@@ -1,6 +1,6 @@
 # inkfmt
 
-**inkfmt** is a code formatter for the [Ink programming language](https://github.com/thesephist/ink). It's written in Ink itself, and contains a self-hosting parser that generates a syntax tree that isn't comprehensive enough to use in the interpreter, but enough to autoformat code. inkfmt is designed to be run before a commit to canonicalize syntax and whitespaces. It makes these transformations:
+**inkfmt** is a code formatter for the [Ink programming language](https://github.com/thesephist/ink). It's written in Ink itself, and contains a self-hosting parser that generates a token stream that isn't comprehensive enough to use in the interpreter, but enough to autoformat code. inkfmt is designed to be run before a commit to canonicalize syntax and whitespaces. It makes these transformations:
 
 - Remove unnecessary commas (rely on automatic comma insertion)
 	- At end of lines
@@ -27,8 +27,11 @@ Ink's indentation rules as implemented in inkfmt`are simple, and implemented at 
 	- No space before and after `.`
 	- No space before `,` and `:`
 	- No space after unary operators
+	- No space in function invocations of the form `<name>(<...tokens>)`
 	- No space after `(`, `{`, `[` and before `)`, `}`, `]` 
-- One indent level is added for each paired delimiter -- (){}[], except inside quoted string literals.
+- One indent level is added for:
+	- each paired delimiter
+	- each incomplete binary expression
 
 ## Credits and references
 
