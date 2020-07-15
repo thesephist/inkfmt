@@ -5,8 +5,12 @@
 std := load('vendor/std')
 str := load('vendor/str')
 
-L := load('lex')
-R := load('render')
+log := std.log
+cat := std.cat
+readFile := std.readFile
+
+lex := load('lex').lex
+render := load('render').render
 
 log := std.log
 f := std.format
@@ -15,35 +19,17 @@ map := std.map
 split := str.split
 trim := str.trim
 
-Version := '0.1'
+Version := '0.1-beta'
 Newline := char(13)
-Tab := char(9)
-
-` The TokenRow is the main data type of inkfmt.
-	it encodes information about a line's list of tokens
-	and an indent level for the line. `
-TokenRow := (indent, tokens) => {
-	indent: indent,
-	tokens: tokens,
-}
-
-` string -> [TokenRow] `
-tokenize := code => (
-	lines := split(code, Newline)
-	tokenRows := map(lines, L.line)
-)
-
-` [TokenRow] -> string `
-render := tokenRows => (
-	lines := map(tokenRows, R.line)
-	doc := join(lines, Newline)
-)
 
 main := (
 	log(f('inkfmt v{{0}}', [Version]))
 
-	` tokenize stdin into TR `
-	` pass TR into renderer, which
-		which deterministically renders it back into text `
+	` we can't rely on std.scan here to read stdin because
+		std.scan reads by line, and we want to read until EOF `
+	readFile('/dev/stdin', document => (
+		formatted := render(lex(document))
+		out(formatted)
+	))
 )
 

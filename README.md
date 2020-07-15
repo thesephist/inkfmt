@@ -2,12 +2,12 @@
 
 **inkfmt** is a code formatter for the [Ink programming language](https://github.com/thesephist/ink). It's written in Ink itself, and contains a self-hosting parser that generates a syntax tree that isn't comprehensive enough to use in the interpreter, but enough to autoformat code. inkfmt is designed to be run before a commit to canonicalize syntax and whitespaces. It makes these transformations:
 
-- Remove redundant parentheses (from expression lists with a single expression)
 - Remove unnecessary commas (rely on automatic comma insertion)
+	- At end of lines
+	- At end of expression lists
 - Canonicalize whitespaces
     - Canonicalize indentation with tab character
     - Single spaces between specific tokens
-    - Remove unnecessary lines leading and trailing a parenthesized expression
 
 Notably, inkfmt does _not_ collapse multiline expressions into single lines, and conversely does not expand lines that are too long into multiple lines -- that's left to the developer's discretion.
 
@@ -21,11 +21,14 @@ inkfmt < main.ink > main.ink
 
 ## Design
 
-Ink's indentation rules as implemented in inkfmt`are simple:
+Ink's indentation rules as implemented in inkfmt`are simple, and implemented at the token stream level, with constructing a full AST.
 
-- We put a single space between each individual token within a line
-- We don't mess with re-breaking lines -- line breaks in the input string / file stays
-- One indent level is added for each paired delimiter -- (){}[]''
+- We put a single space between each individual token within a line, with the following exceptions, from high to low priority:
+	- No space before and after `.`
+	- No space before `,` and `:`
+	- No space after unary operators
+	- No space after `(`, `{`, `[` and before `)`, `}`, `]` 
+- One indent level is added for each paired delimiter -- (){}[], except inside quoted string literals.
 
 ## Credits and references
 
