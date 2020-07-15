@@ -19,10 +19,13 @@ Newline := char(10)
 Tab := char(9)
 Tab := '    '
 
-tabTimes := n => (sub := (i, s) => i :: {
-	0 -> s
-	_ -> sub(i - 1, s + Tab)
-})(n, '')
+tabTimes := n => n > 0 :: {
+	false -> ''
+	_ -> (sub := (i, s) => i :: {
+		0 -> s
+		_ -> sub(i - 1, s + Tab)
+	})(n, '')
+}
 
 `` TODO: add a minifier / minification mode -- only spaces when necessary
 
@@ -49,55 +52,71 @@ opSpaceAfter? := token => token :: {
 }
 
 render := tokens => (
-	state := {
-		doc: ''
-		indent: 0
+	lines := ['']
+	indents := [0]
+
+	indent := {
+		prev: 0
+		curr: 0
 	}
 
 	` spaces are inserted by `
 	each(tokens, (token, i) => (
+		add := (s, tabs) => (
+			trim(lines.(len(lines) - 1), Tab) :: {
+				'' -> lines.(len(lines) - 1) := lines.(len(lines) - 1) + trimPrefix(s, ' ')
+				_ -> lines.(len(lines) - 1) := lines.(len(lines) - 1) + s
+			}
+
+			indent.curr := indent.curr + tabs
+		)
+
 		last := tokens.(i - 1)
 		next := tokens.(i + 1)
-
-		lines := split(state.doc, Newline)
-		push := bit => trim(lines.(len(lines) - 1), Tab) :: {
-			'' -> state.doc := state.doc + trimPrefix(bit, ' ')
-			_ -> state.doc := state.doc + bit
-		}
-
-		token :: {
-			'(' -> state.indent := state.indent + 1
-			'[' -> state.indent := state.indent + 1
-			'{' -> state.indent := state.indent + 1
-			')' -> state.indent := state.indent - 1
-			']' -> state.indent := state.indent - 1
-			'}' -> state.indent := state.indent - 1
-		}
-
 		[last, token, next] :: {
-			[_, '.', _] -> push(token)
-			[_, Newline, ')'] -> push(Newline + tabTimes(state.indent - 1))
-			[_, Newline, ']'] -> push(Newline + tabTimes(state.indent - 1))
-			[_, Newline, '}'] -> push(Newline + tabTimes(state.indent - 1))
-			[_, Newline, _] -> push(Newline + tabTimes(state.indent))
+			[_, Newline, _] -> (
+				tabDiff := indent.curr - indent.prev
+				tabDiff > 0 :: {
+					true -> indents.(len(indents) - 1) := indent.prev
+					false -> indents.(len(indents) - 1) := indent.curr
+				}
+
+				indent.prev := indent.curr
+
+				lines.len(lines) := ''
+				indents.len(indents) := 0
+			)
+			[_, '.', _] -> add('.', 0)
+
 			[_, ',', Newline] -> ()
 			[_, '(', _] -> opSpaceAfter?(last) :: {
-				true -> push(' (')
-				false -> push('(')
+				true -> add(' (', 1)
+				false -> add('(', 1)
 			}
-			[_, ')', _] -> push(token)
-			[_, ']', _] -> push(token)
-			[_, '}', _] -> push(token)
-			[_, ',', _] -> push(token)
-			[_, ':', _] -> push(token)
-			['(', _, _] -> push(token)
-			['[', _, _] -> push(token)
-			['{', _, _] -> push(token)
-			['.', _, _] -> push(token)
-			['~', _, _] -> push(token)
-			_ -> push(' ' + token)
+			[_, '[', _] -> opSpaceAfter?(last) :: {
+				true -> add(' [', 1)
+				false -> add('[', 1)
+			}
+			[_, '{', _] -> opSpaceAfter?(last) :: {
+				true -> add(' {', 1)
+				false -> add('{', 1)
+			}
+
+			[_, ')', _] -> add(')', ~1)
+			[_, ']', _] -> add(']', ~1)
+			[_, '}', _] -> add('}', ~1)
+
+			[_, ',', _] -> add(token, 0)
+			[_, ':', _] -> add(token, 0)
+			['(', _, _] -> add(token, 0)
+			['[', _, _] -> add(token, 0)
+			['{', _, _] -> add(token, 0)
+			['.', _, _] -> add(token, 0)
+			['~', _, _] -> add(token, 0)
+			_ -> add(' ' + token, 0)
 		}
 	))
 
-	state.doc
+	indentedLines := map(lines, (line, i) => tabTimes(indents.(i)) + line)
+	cat(indentedLines, Newline)
 )
