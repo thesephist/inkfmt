@@ -27,7 +27,7 @@ Ink's indentation rules as implemented in inkfmt`are simple, and implemented at 
 	- No space before and after `.`
 	- No space before `,` and `:`
 	- No space after unary operators
-	- No space in function invocations of the form `<name>(<...tokens>)`
+	- Space before `(...)` only if following an operator, not value
 	- No space after `(`, `{`, `[` and before `)`, `}`, `]` 
 - One indent level is added for:
 	- each paired delimiter
