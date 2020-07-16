@@ -54,7 +54,7 @@ lexGuardTokenStringBlock := guardToken => state => (
 		next := state.doc.(i) :: {
 			'\\' -> sub(i + 2, literal + next + state.doc.(i + 1))
 			guardToken -> lexRec({
-				doc: state.doc,
+				doc: state.doc
 				index: i + 1
 				tokens: state.tokens.len(state.tokens) :=
 					guardToken + literal + guardToken
@@ -68,19 +68,23 @@ lexStringLiteral := lexGuardTokenStringBlock('\'')
 lexBlockComment := lexGuardTokenStringBlock('`')
 
 lexLineComment := state => (
-	newlineIndex := index(state.doc, Newline)
-	index :: {
+	newlineIndex := (sub := i => state.doc.(i) :: {
+		() -> ~1
+		Newline -> i
+		_ -> sub(i + 1)
+	})(state.index + 2)
+	newlineIndex :: {
 		~1 -> lexRec({
 			doc: state.doc
 			index: len(state)
 			tokens: state.tokens.len(state.tokens) :=
-				'``' + slice(state.doc, 2, len(state.doc))
+				slice(state.doc, state.index, len(state.doc))
 		})
 		_ -> lexRec({
 			doc: state.doc
-			index: state.index + newlineIndex + 1
+			index: newlineIndex + 1
 			tokens: append(state.tokens, [
-				'``' + slice(state.doc, 2, newlineIndex)
+				slice(state.doc, state.index, newlineIndex)
 				Newline
 			])
 		})
