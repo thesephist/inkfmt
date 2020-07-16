@@ -41,10 +41,11 @@ Symbols := [
 	'{'
 	'}'
 	','
-	` not symbol per se, but should be parsed atomically `
 	'_'
 ]
 
+` tokenize a "string block" which is either a multiline comment
+	block or a multiline string (the only kind of string in Ink) `
 lexGuardTokenStringBlock := guardToken => state => (
 	doc := state.doc
 	(sub := (i, literal) => (
@@ -64,6 +65,8 @@ lexGuardTokenStringBlock := guardToken => state => (
 lexStringLiteral := lexGuardTokenStringBlock('\'')
 lexBlockComment := lexGuardTokenStringBlock('`')
 
+` tokenize a "line comment" which is a single-line comment
+	that terminates at a newline `
 lexLineComment := state => (
 	doc := state.doc
 
@@ -91,11 +94,14 @@ lexLineComment := state => (
 	}
 )
 
+` can this character be in an identifier or a number? `
 identifierCharacter? := c => c :: {
 	() -> false
 	_ -> letter?(c) | digit?(c) | c = '?' | c = '!' | c = '@'
 }
 
+` index of the next space or tab character (to be trimmed)
+	 in the document `
 indexNextSpace := (doc, index) => (sub := i => (
 	doc.(i) :: {
 		' ' -> sub(i + 1)
@@ -104,6 +110,7 @@ indexNextSpace := (doc, index) => (sub := i => (
 	}
 ))(index)
 
+` main recursive-descent tokenizer loop `
 lexRec := state => (
 	doc := state.doc
 
@@ -123,7 +130,7 @@ lexRec := state => (
 			_ -> lexBlockComment(state)
 		}
 		_ -> (
-			` then, search for all symbols `
+			` search for known symbols `
 			matchedSymb := (sub := i => (
 				symb := Symbols.(i)
 				symb :: {

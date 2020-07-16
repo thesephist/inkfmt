@@ -1,6 +1,6 @@
 # inkfmt
 
-**inkfmt** (pronounced "ink format") is a self-hosting code formatter for the [Ink programming language](https://github.com/thesephist/ink). It's written in Ink itself, and contains a lexer that generates a token stream that isn't comprehensive enough to use in the interpreter, but enough to autoformat code. inkfmt is designed to be run before a commit to canonicalize syntax and whitespaces. It makes these transformations:
+**inkfmt** (pronounced "ink format") is a self-hosting code formatter for the [Ink programming language](https://dotink.co/). It's written in Ink itself, and contains a lexer that generates a token stream that isn't comprehensive enough to use in the interpreter, but enough to autoformat code to my satisfaction. inkfmt is designed to be run before a commit to canonicalize syntax and whitespaces. It makes these transformations:
 
 - Remove unnecessary commas (rely on automatic comma insertion)
 	- At end of lines
@@ -11,12 +11,14 @@
 
 Notably, inkfmt does _not_ collapse multiline expressions into single lines, and conversely does not expand lines that are too long into multiple lines -- that's left to the developer's discretion.
 
+All Ink code in this project is, of course, formatted with inkfmt.
+
 ## Usage
 
 At this point, the `inkfmt` program reads Ink code in from `stdin` and writes formatted code and/or errors out to `stdout`. Eventually, the goal will be for the executable to read a tree of files and format all Ink programs within.
 
 ```
-inkfmt < main.ink > main.ink
+inkfmt < input.ink > output.ink
 ```
 
 ## Design
