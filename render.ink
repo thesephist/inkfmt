@@ -29,8 +29,6 @@ tabTimes := n => n > 0 :: {
 	})(n, '')
 }
 
-`` TODO: add a minifier / minification mode -- only spaces when necessary
-
 opSpaceAfter? := token => token :: {
 	'=>' -> true
 	':=' -> true
@@ -162,29 +160,25 @@ render := tokens => (
 
 	each(indents, (n, i) => i :: {
 		0 -> ()
-		_ -> (
-			n < indents.(i - 1) :: {
-				true -> (
-					` backtrack to the line immediately following
-						the first line where indent > n `
-					target := (sub := j => (
-						indents.(j) > n :: {
-							true -> sub(j - 1)
-							false -> j + 1
-						}
-					))(i - 1)
+		_ -> n < indents.(i - 1) :: {
+			true -> (
+				` backtrack to the line immediately following
+					the first line where indent > n `
+				target := (sub := j => indents.(j) > n :: {
+					true -> sub(j - 1)
+					false -> j + 1
+				})(i - 1)
 
-					indents.(target) - n > 1 :: {
-						true -> (
-							diff := indents.(target) - n
-							each(range(target, i, 1), j => (
-								indents.(j) := indents.(j) - diff + 1
-							))
-						)
-					}
-				)
-			}
-		)
+				indents.(target) - n > 1 :: {
+					true -> (
+						diff := indents.(target) - n
+						each(range(target, i, 1), j => (
+							indents.(j) := indents.(j) - diff + 1
+						))
+					)
+				}
+			)
+		}
 	})
 
 	indentedLines := map(lines, (line, i) => line :: {
