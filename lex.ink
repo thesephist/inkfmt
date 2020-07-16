@@ -4,11 +4,11 @@ std := load('vendor/std')
 str := load('vendor/str')
 
 slice := std.slice
-index := std.index
 append := std.append
 
 letter? := str.letter?
 digit? := str.digit?
+index := str.index
 hasPrefix? := str.hasPrefix?
 
 Newline := char(10)
