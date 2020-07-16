@@ -1,13 +1,13 @@
 # inkfmt
 
-**inkfmt** is a code formatter for the [Ink programming language](https://github.com/thesephist/ink). It's written in Ink itself, and contains a self-hosting parser that generates a token stream that isn't comprehensive enough to use in the interpreter, but enough to autoformat code. inkfmt is designed to be run before a commit to canonicalize syntax and whitespaces. It makes these transformations:
+**inkfmt** (pronounced "ink format") is a self-hosting code formatter for the [Ink programming language](https://github.com/thesephist/ink). It's written in Ink itself, and contains a lexer that generates a token stream that isn't comprehensive enough to use in the interpreter, but enough to autoformat code. inkfmt is designed to be run before a commit to canonicalize syntax and whitespaces. It makes these transformations:
 
 - Remove unnecessary commas (rely on automatic comma insertion)
 	- At end of lines
 	- At end of expression lists
 - Canonicalize whitespaces
     - Canonicalize indentation with tab character
-    - Single spaces between specific tokens
+    - Ensure single spaces between specific tokens, when appropriate
 
 Notably, inkfmt does _not_ collapse multiline expressions into single lines, and conversely does not expand lines that are too long into multiple lines -- that's left to the developer's discretion.
 

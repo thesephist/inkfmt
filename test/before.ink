@@ -20,6 +20,8 @@ g := (a, b, c, d, e, f) =>
 	a + b + c + d +
 		e + f
 
+log(f('{{ 0 }} --> {{ 1 }}'
+	[a, b]))
 readFile('/dev/stdin', data => (
 	doSomethingWith(data)
 ))
