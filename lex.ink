@@ -3,8 +3,10 @@
 std := load('vendor/std')
 str := load('vendor/str')
 
+log := std.log
 f := std.format
 slice := std.slice
+index := std.index
 append := std.append
 
 letter? := str.letter?
@@ -84,7 +86,7 @@ lexLineComment := state => (
 
 identifierCharacter? := c => c :: {
 	() -> false
-	_ -> letter?(c) | digit?(c) |  c = '?' | c = '!' | c = '@'
+	_ -> letter?(c) | digit?(c) | c = '?' | c = '!' | c = '@'
 }
 
 indexFirstNonWS := s => (sub := i => (
@@ -128,14 +130,14 @@ lexRec := state => (
 					` identifier, number, or true/false which can
 						all be treated as identifiers for inkfmt:
 						read until next non-identifier character `
-						(sub := i => identifierCharacter?(state.doc.(i)) :: {
-							false -> lexRec({
-								doc: slice(state.doc, i, len(state.doc))
-								tokens: state.tokens.len(state.tokens) :=
-									slice(state.doc, 0, i)
-							})
-							_ -> sub(i + 1)
-						})(1)
+					(sub := i => identifierCharacter?(state.doc.(i)) :: {
+						false -> lexRec({
+							doc: slice(state.doc, i, len(state.doc))
+							tokens: state.tokens.len(state.tokens) :=
+								slice(state.doc, 0, i)
+						})
+						_ -> sub(i + 1)
+					})(1)
 				)
 				_ -> lexRec({
 					doc: slice(state.doc, len(matchedSymb), len(state.doc))
@@ -148,14 +150,22 @@ lexRec := state => (
 
 ` main exported function `
 lex := s => (
-	state := lexRec({
+	state := {
 		` TODO: probably should be passing i scanning thru doc,
 			instead of copying slices of doc around `
 		` TODO: decompose this struct into two arguments that are passed
 			around separately `
 		doc: s
 		tokens: []
-    })
+	}
+	hasPrefix?(s, '#!/') :: {
+		true -> (
+			state.tokens := [slice(state.doc, 0, index(state.doc, Newline))]
+			state.doc := slice(state.doc, index(state.doc, Newline), len(state.doc))
+		)
+	}
+
+	state := lexRec(state)
 
 	state.tokens
 )

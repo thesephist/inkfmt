@@ -20,7 +20,6 @@ lex := load('lex')
 
 Newline := char(10)
 Tab := char(9)
-Tab := '    '
 
 tabTimes := n => n > 0 :: {
 	false -> ''
@@ -185,6 +184,9 @@ render := tokens => (
 		)
 	})
 
-	indentedLines := map(lines, (line, i) => tabTimes(indents.(i)) + line)
+	indentedLines := map(lines, (line, i) => line :: {
+		'' -> ''
+		_ -> tabTimes(indents.(i)) + line
+	})
 	cat(indentedLines, Newline)
 )
