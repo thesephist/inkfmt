@@ -97,33 +97,6 @@ indexFirstNonWS := s => (sub := i => (
 ))(0)
 
 lexRec := state => (
-	` automatic comma insertion after valid trailing characters `
-	lastToken := state.tokens.(len(state.tokens) - 1)
-	insertComma := () => state.tokens.len(state.tokens) := ','
-	[state.doc.0, lastToken] :: {
-		[Newline, ','] -> ()
-		[Newline, _] -> lastToken :: {
-			':=' -> ()
-			'::' -> ()
-			'->' -> ()
-			'~' -> ()
-			':' -> ()
-			'.' -> ()
-			'=' -> ()
-			'-' -> ()
-			'+' -> ()
-			'*' -> ()
-			'/' -> ()
-			'%' -> ()
-			'>' -> ()
-			'<' -> ()
-			'&' -> ()
-			'|' -> ()
-			'^' -> ()
-			_ -> insertComma()
-		}
-	}
-
 	state.doc := slice(state.doc, indexFirstNonWS(state.doc), len(state.doc))
 
 	state.doc.0 :: {
