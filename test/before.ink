@@ -28,7 +28,16 @@ readFile('/dev/stdin', data => (
 
 ` copy of std.log function
 	and a description in a multiline block comment `
-	Newline := char(~~10)
+	Newline := char( ~ ~10, )
 log := x => (
 	out(string(x) + Newline)
 	)
+
+Promise((res,rej)=> (
+			query? :: {
+			true -> 1 + 2.5 +
+		res()
+			false ->
+		rej()
+			}
+	))
