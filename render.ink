@@ -63,6 +63,8 @@ render := tokens => (
 	indent := {
 		prev: 0
 		curr: 0
+		` indicates whether the following line should have a hanging indent `
+		hanging?: false
 	}
 
 	` spaces are inserted by `
@@ -85,6 +87,10 @@ render := tokens => (
 					false -> indent.prev
 				})
 
+				indent.hanging? :: {
+					true -> indents.(len(indents) - 1) := tail(indents) + 1
+				}
+
 				` if indent.prev != indents.(len(indents) - 2)
 					and indents.(len(indents) - 2) == indent.curr
 					add hanging indent. `
@@ -99,6 +105,27 @@ render := tokens => (
 
 				lines.len(lines) := ''
 				indents.len(indents) := 0
+
+				indent.hanging? := (last :: {
+					'=>' -> true
+					':=' -> true
+					'::' -> true
+					'->' -> true
+					':' -> true
+					'.' -> true
+					'=' -> true
+					'-' -> true
+					'+' -> true
+					'*' -> true
+					'/' -> true
+					'%' -> true
+					'>' -> true
+					'<' -> true
+					'&' -> true
+					'|' -> true
+					'^' -> true
+					_ -> false
+				})
 			)
 			[_, '.', _] -> add('.', 0)
 

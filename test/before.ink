@@ -18,7 +18,7 @@ func := (x, y) => x + y * 10
 
 g := (a, b, c, d, e, f) =>
 	a + b + c + d +
-		e + f
+	e + f
 
 log(f('{{ 0 }} --> {{ 1 }}'
 	[a, b]))
