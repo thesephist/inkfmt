@@ -49,8 +49,8 @@ Symbols := [
 
 lexGuardTokenStringBlock := guardToken => state => (
 	(sub := (i, literal) => (
-		next := state.doc.(i)
-		next :: {
+		next := state.doc.(i) :: {
+			'\\' -> sub(i + 2, literal + next + state.doc.(i + 1))
 			guardToken -> {
 				doc: slice(state.doc, i + 1, len(state.doc))
 				tokens: state.tokens.len(state.tokens) :=

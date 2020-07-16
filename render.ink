@@ -134,9 +134,7 @@ render := tokens => (
 	each(indents, (n, i) => i :: {
 		0 -> ()
 		_ -> (
-			nLast := indents.(i - 1)
-
-			n < nLast :: {
+			n < indents.(i - 1) :: {
 				true -> (
 					` backtrack to the line immediately following
 						the first line where indent > n `
@@ -150,13 +148,8 @@ render := tokens => (
 					indents.(target) - n > 1 :: {
 						true -> (
 							diff := indents.(target) - n
-							correctDiff := 1
-							toSubtractFromEachLine := diff - correctDiff
-
-							log(f('collapsing indents: {{0}} ~ {{1}} by {{2}}'
-								[target + 1, i, toSubtractFromEachLine]))
 							each(range(target, i, 1), j => (
-								indents.(j) := indents.(j) - toSubtractFromEachLine
+								indents.(j) := indents.(j) - diff + 1
 							))
 						)
 					}
