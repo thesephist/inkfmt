@@ -3,16 +3,12 @@
 std := load('vendor/std')
 str := load('vendor/str')
 
-log := std.log
-f := std.format
 slice := std.slice
 index := std.index
 append := std.append
 
 letter? := str.letter?
 digit? := str.digit?
-
-index := str.index
 hasPrefix? := str.hasPrefix?
 
 Newline := char(10)
@@ -50,11 +46,12 @@ Symbols := [
 ]
 
 lexGuardTokenStringBlock := guardToken => state => (
+	doc := state.doc
 	(sub := (i, literal) => (
-		next := state.doc.(i) :: {
-			'\\' -> sub(i + 2, literal + next + state.doc.(i + 1))
+		next := doc.(i) :: {
+			'\\' -> sub(i + 2, literal + next + doc.(i + 1))
 			guardToken -> lexRec({
-				doc: state.doc
+				doc: doc
 				index: i + 1
 				tokens: state.tokens.len(state.tokens) :=
 					guardToken + literal + guardToken
@@ -68,23 +65,26 @@ lexStringLiteral := lexGuardTokenStringBlock('\'')
 lexBlockComment := lexGuardTokenStringBlock('`')
 
 lexLineComment := state => (
-	newlineIndex := (sub := i => state.doc.(i) :: {
+	doc := state.doc
+
+	newlineIndex := (sub := i => doc.(i) :: {
 		() -> ~1
 		Newline -> i
 		_ -> sub(i + 1)
 	})(state.index + 2)
+
 	newlineIndex :: {
 		~1 -> lexRec({
-			doc: state.doc
+			doc: doc
 			index: len(state)
 			tokens: state.tokens.len(state.tokens) :=
-				slice(state.doc, state.index, len(state.doc))
+				slice(doc, state.index, len(doc))
 		})
 		_ -> lexRec({
-			doc: state.doc
+			doc: doc
 			index: newlineIndex + 1
 			tokens: append(state.tokens, [
-				slice(state.doc, state.index, newlineIndex)
+				slice(doc, state.index, newlineIndex)
 				Newline
 			])
 		})
@@ -105,17 +105,20 @@ indexNextSpace := (doc, index) => (sub := i => (
 ))(index)
 
 lexRec := state => (
-	state.index := indexNextSpace(state.doc, state.index)
+	doc := state.doc
 
-	state.doc.(state.index) :: {
+	` trim off starting space/tabs `
+	state.index := indexNextSpace(doc, state.index)
+
+	doc.(state.index) :: {
 		() -> state
 		Newline -> lexRec({
-			doc: state.doc
+			doc: doc
 			index: state.index + 1
 			tokens: state.tokens.len(state.tokens) := Newline
 		})
 		'\'' -> lexStringLiteral(state)
-		'`' -> state.doc.(state.index + 1) :: {
+		'`' -> doc.(state.index + 1) :: {
 			'`' -> lexLineComment(state)
 			_ -> lexBlockComment(state)
 		}
@@ -125,7 +128,7 @@ lexRec := state => (
 				symb := Symbols.(i)
 				symb :: {
 					() -> ()
-					_ -> slice(state.doc, state.index, state.index + len(symb)) = symb :: {
+					_ -> slice(doc, state.index, state.index + len(symb)) = symb :: {
 						true -> symb
 						false -> sub(i + 1)
 					}
@@ -137,18 +140,18 @@ lexRec := state => (
 					` identifier, number, or true/false which can
 						all be treated as identifiers for inkfmt:
 						read until next non-identifier character `
-					(sub := i => identifierCharacter?(state.doc.(i)) :: {
+					(sub := i => identifierCharacter?(doc.(i)) :: {
 						false -> lexRec({
-							doc: state.doc
+							doc: doc
 							index: i
 							tokens: state.tokens.len(state.tokens) :=
-								slice(state.doc, state.index, i)
+								slice(doc, state.index, i)
 						})
 						_ -> sub(i + 1)
 					})(state.index + 1)
 				)
 				_ -> lexRec({
-					doc: state.doc
+					doc: doc
 					index: state.index + len(matchedSymb)
 					tokens: state.tokens.len(state.tokens) := matchedSymb
 				})
